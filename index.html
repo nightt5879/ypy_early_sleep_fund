@@ -1,0 +1,700 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>早睡早起打卡日历</title>
+  <style>
+    :root{
+      --bg:#0b1020;
+      --card:#121a33;
+      --muted:#96a0c6;
+      --text:#e9ecff;
+      --line:rgba(255,255,255,.12);
+      --blank:rgba(255,255,255,.08);
+      --good:#2ecc71;
+      --bad:#ff4d4f;
+      --chip:#1a2550;
+      --shadow:0 14px 30px rgba(0,0,0,.35);
+      --radius:18px;
+    }
+
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      background: radial-gradient(1200px 700px at 15% 10%, rgba(76,99,255,.25), transparent 60%),
+                  radial-gradient(900px 600px at 80% 20%, rgba(46,204,113,.18), transparent 55%),
+                  radial-gradient(900px 700px at 65% 90%, rgba(255,77,79,.12), transparent 55%),
+                  var(--bg);
+      color:var(--text);
+      min-height:100vh;
+      display:flex;
+      align-items:flex-start;
+      justify-content:center;
+      padding:28px 14px;
+    }
+
+    .app{width:min(1050px, 100%);}
+
+    .topbar{
+      display:flex;
+      gap:14px;
+      align-items:center;
+      justify-content:space-between;
+      margin-bottom:14px;
+    }
+
+    .brand{
+      display:flex;
+      gap:12px;
+      align-items:center;
+    }
+    .logo{
+      width:44px;height:44px;
+      border-radius:14px;
+      background: linear-gradient(135deg, rgba(76,99,255,.9), rgba(46,204,113,.75));
+      box-shadow: var(--shadow);
+      display:grid;
+      place-items:center;
+      font-weight:800;
+      letter-spacing:.5px;
+    }
+    .brand h1{
+      margin:0;
+      font-size:18px;
+      line-height:1.1;
+    }
+    .brand p{
+      margin:0;
+      color:var(--muted);
+      font-size:12px;
+    }
+
+    .toolbar{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+
+    .btn{
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.06);
+      color:var(--text);
+      border-radius:14px;
+      padding:10px 12px;
+      cursor:pointer;
+      transition:.15s ease;
+      user-select:none;
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+    .btn:hover{transform: translateY(-1px); background: rgba(255,255,255,.09)}
+    .btn:active{transform: translateY(0px)}
+
+    .monthTitle{
+      font-weight:700;
+      padding:10px 14px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.05);
+      border-radius:14px;
+      min-width: 170px;
+      text-align:center;
+    }
+
+    .layout{
+      display:grid;
+      grid-template-columns: 1fr 320px;
+      gap:14px;
+    }
+
+    @media (max-width: 960px){
+      .layout{grid-template-columns: 1fr;}
+    }
+
+    .card{
+      background: rgba(18,26,51,.88);
+      border:1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+      backdrop-filter: blur(8px);
+    }
+
+    .cardHeader{
+      padding:14px 16px;
+      border-bottom:1px solid var(--line);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+    }
+
+    .legend{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      flex-wrap:wrap;
+      color:var(--muted);
+      font-size:12px;
+    }
+    .dot{width:10px;height:10px;border-radius:999px;display:inline-block;margin-right:6px;vertical-align:middle}
+
+    .grid{
+      display:grid;
+      grid-template-columns: repeat(7, 1fr);
+    }
+
+    .dow{
+      padding:10px 10px;
+      font-size:12px;
+      color:var(--muted);
+      border-bottom:1px solid var(--line);
+      text-align:center;
+      background: rgba(255,255,255,.03);
+    }
+
+    .cell{
+      border-right:1px solid var(--line);
+      border-bottom:1px solid var(--line);
+      padding:10px;
+      min-height:106px;
+      position:relative;
+      overflow:hidden;
+    }
+
+    .cell:nth-child(7n){border-right:none;}
+
+    .dateNum{
+      font-size:12px;
+      color:var(--muted);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      margin-bottom:8px;
+    }
+
+    .badgeToday{
+      font-size:11px;
+      padding:2px 8px;
+      border-radius:999px;
+      background: rgba(76,99,255,.25);
+      border:1px solid rgba(76,99,255,.35);
+      color:#cfd6ff;
+    }
+
+    .twoSlots{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap:8px;
+    }
+
+    .slot{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding:8px 10px;
+      border-radius:14px;
+      border:1px solid var(--line);
+      background: var(--blank);
+      cursor:pointer;
+      user-select:none;
+      transition:.12s ease;
+    }
+
+    .slot:hover{transform: translateY(-1px);}
+
+    .slot .label{font-size:12px;color:#d7dcff;}
+    .slot .stateText{font-size:12px;color:var(--muted)}
+
+    .slot.good{background: rgba(46,204,113,.18); border-color: rgba(46,204,113,.35)}
+    .slot.good .stateText{color: rgba(46,204,113,.95)}
+
+    .slot.bad{background: rgba(255,77,79,.18); border-color: rgba(255,77,79,.38)}
+    .slot.bad .stateText{color: rgba(255,77,79,.96)}
+
+    .slot.blank{background: rgba(255,255,255,.06);}
+
+    .cell.dim{opacity:.45;}
+
+    .side{
+      padding:14px;
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+    }
+
+    .metric{
+      padding:12px;
+      border:1px solid var(--line);
+      border-radius:16px;
+      background: rgba(255,255,255,.05);
+    }
+
+    .metric .k{color:var(--muted); font-size:12px;}
+    .metric .v{font-size:22px; font-weight:800; margin-top:6px;}
+
+    .metric .sub{
+      margin-top:8px;
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      color:var(--muted);
+      font-size:12px;
+    }
+
+    .pill{
+      background: var(--chip);
+      border:1px solid rgba(255,255,255,.12);
+      padding:6px 10px;
+      border-radius:999px;
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+    }
+
+    .note{
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.5;
+      padding:12px;
+      border:1px dashed rgba(255,255,255,.18);
+      border-radius:16px;
+      background: rgba(0,0,0,.10);
+    }
+
+    .danger{border-color: rgba(255,77,79,.35)}
+    .ok{border-color: rgba(46,204,113,.35)}
+
+    .row{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .btnPrimary{
+      background: rgba(76,99,255,.22);
+      border-color: rgba(76,99,255,.35);
+    }
+
+    .btnDanger{
+      background: rgba(255,77,79,.18);
+      border-color: rgba(255,77,79,.35);
+    }
+
+    .btnGhost{
+      background: transparent;
+    }
+
+    .footer{
+      margin-top:12px;
+      color:rgba(255,255,255,.55);
+      font-size:12px;
+      text-align:center;
+    }
+
+    .toast{
+      position: fixed;
+      left: 50%;
+      bottom: 16px;
+      transform: translateX(-50%);
+      background: rgba(18,26,51,.95);
+      border:1px solid rgba(255,255,255,.14);
+      padding:10px 12px;
+      border-radius:14px;
+      box-shadow: var(--shadow);
+      opacity: 0;
+      pointer-events: none;
+      transition: .18s ease;
+      color: var(--text);
+      font-size: 12px;
+      max-width: min(520px, calc(100% - 24px));
+      text-align:center;
+    }
+    .toast.show{opacity: 1; transform: translateX(-50%) translateY(-4px)}
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="topbar">
+      <div class="brand">
+        <div class="logo">Z</div>
+        <div>
+          <h1>早睡早起打卡日历</h1>
+          <p>点击格子循环：空白 → 绿色(成功) → 红色(失败)</p>
+        </div>
+      </div>
+
+      <div class="toolbar">
+        <button class="btn" id="prevMonth">◀ 上个月</button>
+        <div class="monthTitle" id="monthTitle">—</div>
+        <button class="btn" id="nextMonth">下个月 ▶</button>
+        <button class="btn btnPrimary" id="jumpToday">回到今天</button>
+      </div>
+    </div>
+
+    <div class="layout">
+      <div class="card">
+        <div class="cardHeader">
+          <div style="font-weight:700">日历</div>
+          <div class="legend">
+            <span><span class="dot" style="background:rgba(255,255,255,.35)"></span>空白(未填)</span>
+            <span><span class="dot" style="background:var(--good)"></span>绿色(成功)：-1</span>
+            <span><span class="dot" style="background:var(--bad)"></span>红色(失败)：+1</span>
+          </div>
+        </div>
+
+        <div class="grid" id="dowRow"></div>
+        <div class="grid" id="calendarGrid"></div>
+      </div>
+
+      <div class="card side">
+        <div class="metric">
+          <div class="k">总计收益（红+1，绿-1，可为负数）</div>
+          <div class="v" id="totalScore">0</div>
+          <div class="sub">
+            <span class="pill"><span class="dot" style="background:var(--good)"></span>绿色次数：<b id="goodCount">0</b></span>
+            <span class="pill"><span class="dot" style="background:var(--bad)"></span>红色次数：<b id="badCount">0</b></span>
+            <span class="pill"><span class="dot" style="background:rgba(255,255,255,.35)"></span>未填：<b id="blankCount">0</b></span>
+          </div>
+        </div>
+
+        <div class="metric" id="todayBox">
+          <div class="k">当日应付（今天两格合计）</div>
+          <div class="v" id="todayScore">0</div>
+          <div class="sub">
+            <span class="pill">今日日期：<b id="todayDate">—</b></span>
+          </div>
+        </div>
+
+        <div class="metric">
+          <div class="k">结款</div>
+          <div class="v" id="unsettled">0</div>
+          <div class="sub">
+            <span class="pill">已结至：<b id="settledAt">未结</b></span>
+            <span class="pill">已结金额：<b id="settledAmount">0</b></span>
+          </div>
+          <div class="row" style="margin-top:10px;">
+            <button class="btn btnPrimary" id="settleBtn">结款（把当前未结置 0）</button>
+            <button class="btn btnGhost" id="exportBtn">导出JSON</button>
+            <button class="btn btnDanger" id="resetBtn">清空全部</button>
+          </div>
+        </div>
+
+        <div class="note">
+          <b>玩法建议：</b><br/>
+          • 绿色代表你做到了（越多越“赚钱”）<br/>
+          • 红色代表没做到（会“亏钱”）<br/>
+          • 你可以把“结款”当作阶段性统计，比如每周/每月结算一次
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">数据自动保存在浏览器本地（localStorage），刷新不会丢。</div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // ====== 数据模型 ======
+    // 每个日期存两格：sleep, wake 的状态：0=空白 1=绿色 2=红色
+    // 计分：绿色 -1，红色 +1，空白 0
+
+    const LS_KEY = "zszz_calendar_v1";
+
+    function loadState(){
+      try{ return JSON.parse(localStorage.getItem(LS_KEY) || "{}") }catch{ return {} }
+    }
+    function saveState(s){
+      localStorage.setItem(LS_KEY, JSON.stringify(s));
+    }
+
+    let state = loadState();
+    // state.data: { "YYYY-MM-DD": {sleep:0|1|2, wake:0|1|2} }
+    // state.settlement: { settledTotal: number, settledAt: "YYYY-MM-DD" }
+    if(!state.data) state.data = {};
+    if(!state.settlement) state.settlement = { settledTotal: 0, settledAt: "" };
+
+    // ====== 日期工具 ======
+    const pad2 = (n) => String(n).padStart(2, "0");
+    const toISO = (d) => `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
+    const monthKey = (y,m) => `${y}-${pad2(m+1)}`;
+
+    const today = new Date();
+    let viewYear = today.getFullYear();
+    let viewMonth = today.getMonth();
+
+    // ====== UI 元素 ======
+    const monthTitleEl = document.getElementById("monthTitle");
+    const gridEl = document.getElementById("calendarGrid");
+    const dowRowEl = document.getElementById("dowRow");
+
+    const totalScoreEl = document.getElementById("totalScore");
+    const goodCountEl = document.getElementById("goodCount");
+    const badCountEl = document.getElementById("badCount");
+    const blankCountEl = document.getElementById("blankCount");
+
+    const todayScoreEl = document.getElementById("todayScore");
+    const todayDateEl = document.getElementById("todayDate");
+
+    const unsettledEl = document.getElementById("unsettled");
+    const settledAtEl = document.getElementById("settledAt");
+    const settledAmountEl = document.getElementById("settledAmount");
+
+    const toastEl = document.getElementById("toast");
+    let toastTimer = null;
+    function toast(msg){
+      toastEl.textContent = msg;
+      toastEl.classList.add("show");
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(()=>toastEl.classList.remove("show"), 1500);
+    }
+
+    // ====== 计分规则 ======
+    function scoreOf(status){
+      if(status === 1) return -1;
+      if(status === 2) return +1;
+      return 0;
+    }
+
+    function cycle(status){
+      // 0 -> 1 -> 2 -> 0
+      return (status + 1) % 3;
+    }
+
+    function ensureDay(iso){
+      if(!state.data[iso]) state.data[iso] = { sleep:0, wake:0 };
+      return state.data[iso];
+    }
+
+    function computeTotals(){
+      let total = 0;
+      let good = 0;
+      let bad = 0;
+      let blank = 0;
+
+      for(const iso in state.data){
+        const d = state.data[iso];
+        for(const k of ["sleep","wake"]){
+          const s = d[k] ?? 0;
+          total += scoreOf(s);
+          if(s === 1) good++;
+          else if(s === 2) bad++;
+          else blank++;
+        }
+      }
+
+      return { total, good, bad, blank };
+    }
+
+    function computeTodayScore(){
+      const iso = toISO(new Date());
+      const d = ensureDay(iso);
+      return scoreOf(d.sleep) + scoreOf(d.wake);
+    }
+
+    function updateSidebar(){
+      const { total, good, bad, blank } = computeTotals();
+      totalScoreEl.textContent = String(total);
+      goodCountEl.textContent = String(good);
+      badCountEl.textContent = String(bad);
+      blankCountEl.textContent = String(blank);
+
+      // 今日
+      const iso = toISO(new Date());
+      todayDateEl.textContent = iso;
+      todayScoreEl.textContent = String(computeTodayScore());
+
+      // 结款
+      const settledTotal = state.settlement.settledTotal || 0;
+      const unsettled = total - settledTotal;
+      unsettledEl.textContent = String(unsettled);
+      settledAmountEl.textContent = String(settledTotal);
+      settledAtEl.textContent = state.settlement.settledAt ? state.settlement.settledAt : "未结";
+
+      // 颜色提示（收益为负是“赚”，正是“亏”）
+      totalScoreEl.style.color = (total <= 0) ? "rgba(46,204,113,.95)" : "rgba(255,77,79,.96)";
+      unsettledEl.style.color = (unsettled <= 0) ? "rgba(46,204,113,.95)" : "rgba(255,77,79,.96)";
+      todayScoreEl.style.color = (computeTodayScore() <= 0) ? "rgba(46,204,113,.95)" : "rgba(255,77,79,.96)";
+    }
+
+    // ====== 渲染日历 ======
+    const DOW = ["一","二","三","四","五","六","日"]; // 周一开始
+
+    function renderDow(){
+      dowRowEl.innerHTML = "";
+      for(const d of DOW){
+        const el = document.createElement("div");
+        el.className = "dow";
+        el.textContent = "周" + d;
+        dowRowEl.appendChild(el);
+      }
+    }
+
+    function renderCalendar(){
+      monthTitleEl.textContent = `${viewYear} 年 ${viewMonth+1} 月`;
+
+      const first = new Date(viewYear, viewMonth, 1);
+      const last = new Date(viewYear, viewMonth+1, 0);
+
+      // Monday-based index: JS getDay() => Sun=0..Sat=6
+      const firstDay = first.getDay();
+      const offset = (firstDay === 0) ? 6 : (firstDay - 1);
+
+      const daysInMonth = last.getDate();
+
+      // 6 weeks grid = 42 cells
+      gridEl.innerHTML = "";
+
+      const startDate = new Date(viewYear, viewMonth, 1 - offset);
+
+      for(let i=0;i<42;i++){
+        const d = new Date(startDate);
+        d.setDate(startDate.getDate()+i);
+
+        const iso = toISO(d);
+        const inMonth = d.getMonth() === viewMonth;
+        const isToday = iso === toISO(new Date());
+
+        const cell = document.createElement("div");
+        cell.className = "cell" + (inMonth ? "" : " dim");
+
+        const header = document.createElement("div");
+        header.className = "dateNum";
+
+        const left = document.createElement("span");
+        left.textContent = d.getDate();
+
+        header.appendChild(left);
+        if(isToday){
+          const b = document.createElement("span");
+          b.className = "badgeToday";
+          b.textContent = "今天";
+          header.appendChild(b);
+        } else {
+          const spacer = document.createElement("span");
+          spacer.textContent = "";
+          header.appendChild(spacer);
+        }
+
+        const two = document.createElement("div");
+        two.className = "twoSlots";
+
+        const day = ensureDay(iso);
+
+        two.appendChild(makeSlot("早睡", iso, "sleep", day.sleep));
+        two.appendChild(makeSlot("早起", iso, "wake",  day.wake));
+
+        cell.appendChild(header);
+        cell.appendChild(two);
+
+        gridEl.appendChild(cell);
+      }
+
+      updateSidebar();
+      saveState(state);
+    }
+
+    function stateLabel(s){
+      if(s===1) return "成功 ✅";
+      if(s===2) return "失败 ❌";
+      return "未填";
+    }
+
+    function makeSlot(label, iso, key, status){
+      const slot = document.createElement("div");
+      slot.className = "slot " + (status===1?"good":status===2?"bad":"blank");
+
+      const l = document.createElement("div");
+      l.className = "label";
+      l.textContent = label;
+
+      const r = document.createElement("div");
+      r.className = "stateText";
+      r.textContent = stateLabel(status);
+
+      slot.appendChild(l);
+      slot.appendChild(r);
+
+      slot.addEventListener("click", ()=>{
+        const day = ensureDay(iso);
+        day[key] = cycle(day[key] ?? 0);
+
+        // 立即更新当前 slot
+        const newStatus = day[key];
+        slot.className = "slot " + (newStatus===1?"good":newStatus===2?"bad":"blank");
+        r.textContent = stateLabel(newStatus);
+
+        // 更新侧栏与保存
+        updateSidebar();
+        saveState(state);
+
+        const delta = scoreOf(newStatus) - scoreOf((newStatus+2)%3); // 仅用于提示（近似）
+        const tip = (newStatus===0) ? "置为未填" : (newStatus===1?"记为成功 -1":"记为失败 +1");
+        toast(`${iso} ${label}：${tip}`);
+      });
+
+      return slot;
+    }
+
+    // ====== 交互按钮 ======
+    document.getElementById("prevMonth").addEventListener("click", ()=>{
+      viewMonth--;
+      if(viewMonth<0){ viewMonth=11; viewYear--; }
+      renderCalendar();
+    });
+
+    document.getElementById("nextMonth").addEventListener("click", ()=>{
+      viewMonth++;
+      if(viewMonth>11){ viewMonth=0; viewYear++; }
+      renderCalendar();
+    });
+
+    document.getElementById("jumpToday").addEventListener("click", ()=>{
+      const t = new Date();
+      viewYear = t.getFullYear();
+      viewMonth = t.getMonth();
+      renderCalendar();
+      toast("已回到本月");
+    });
+
+    document.getElementById("settleBtn").addEventListener("click", ()=>{
+      const { total } = computeTotals();
+      state.settlement.settledTotal = total;
+      state.settlement.settledAt = toISO(new Date());
+      saveState(state);
+      updateSidebar();
+      toast("结款完成：未结已清零");
+    });
+
+    document.getElementById("resetBtn").addEventListener("click", ()=>{
+      if(!confirm("确定要清空全部数据吗？此操作不可撤销。")) return;
+      state = { data: {}, settlement: { settledTotal: 0, settledAt: "" } };
+      saveState(state);
+      renderCalendar();
+      toast("已清空");
+    });
+
+    document.getElementById("exportBtn").addEventListener("click", ()=>{
+      const blob = new Blob([JSON.stringify(state, null, 2)], {type:"application/json"});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "zszz_calendar_export.json";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      toast("已导出 JSON");
+    });
+
+    // ====== 启动 ======
+    renderDow();
+    renderCalendar();
+  </script>
+</body>
+</html>
