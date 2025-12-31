@@ -161,6 +161,80 @@
     .pill{background: var(--chip);border:1px solid rgba(255,255,255,.12);padding:6px 10px;border-radius:999px;display:inline-flex;align-items:center;gap:6px;}
 
     .footer{margin-top:12px;color:rgba(255,255,255,.55);font-size:12px;text-align:center;}
+
+    /* ===== Mobile (<= 560px) ===== */
+  @media (max-width: 560px){
+    body{ padding:14px 10px; }
+
+    .topbar{
+      flex-direction: column;
+      align-items: stretch;
+      gap:10px;
+    }
+
+    .toolbar{
+      justify-content: space-between;
+      gap:8px;
+    }
+
+    .monthTitle{
+      min-width: 120px;
+      padding:8px 10px;
+      font-size:12px;
+    }
+
+    .btn{
+      padding:8px 10px;
+      border-radius:12px;
+      font-size:12px;
+      gap:6px;
+    }
+
+    .cardHeader{
+      padding:12px 12px;
+      flex-direction: column;
+      align-items: flex-start;
+      gap:8px;
+    }
+
+    .legend{ font-size:11px; gap:8px; }
+
+    /* 日历格子压缩 */
+    .cell{
+      padding:8px;
+      min-height:92px;
+    }
+
+    .twoSlots{ gap:6px; }
+
+    .slot{
+      padding:7px 9px;
+      border-radius:12px;
+    }
+
+    .slot .label,
+    .slot .stateText{
+      font-size:11px;
+    }
+
+    /* 侧栏变成“卡片列表”更舒服 */
+    .side{
+      padding:12px;
+      gap:10px;
+    }
+
+    .metric{
+      padding:10px;
+      border-radius:14px;
+    }
+
+    .metric .v{ font-size:20px; }
+
+    .pill{
+      padding:5px 8px;
+      font-size:11px;
+    }
+  }
   </style>
 </head>
 <body>
