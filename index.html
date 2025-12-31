@@ -218,6 +218,15 @@
         </div>
 
         <div class="metric">
+          <div class="k">当日应结（昨日早睡 + 今日早起）</div>
+          <div class="v" id="dailyDue">0</div>
+          <div class="sub">
+            <span class="pill">今日：<b id="dueToday">—</b></span>
+            <span class="pill">昨日：<b id="duePrev">—</b></span>
+          </div>
+        </div>
+
+        <div class="metric">
           <div class="k">结款（来自 data.json）</div>
           <div class="v" id="unsettled">0</div>
           <div class="sub">
@@ -250,6 +259,10 @@
     const monthKeyEl = document.getElementById("monthKey");
     const monthDaysEl = document.getElementById("monthDays");
 
+    const dailyDueEl = document.getElementById("dailyDue");
+    const dueTodayEl = document.getElementById("dueToday");
+    const duePrevEl = document.getElementById("duePrev");
+
     const unsettledEl = document.getElementById("unsettled");
     const settledAtEl = document.getElementById("settledAt");
     const settledAmountEl = document.getElementById("settledAmount");
@@ -271,6 +284,21 @@
       if(s===1) return "成功 ✅";
       if(s===2) return "失败 ❌";
       return "未填";
+    }
+
+    function addDaysISO(iso, delta){
+      const [y,m,d] = iso.split('-').map(Number);
+      const dt = new Date(y, m-1, d);
+      dt.setDate(dt.getDate() + delta);
+      return toISO(dt);
+    }
+
+    // 当日应结：昨日早睡 + 今日早起
+    function computeDailyDue(iso){
+      const prev = addDaysISO(iso, -1);
+      const prevDay = state.data[prev] || { sleep:0, wake:0 };
+      const curDay  = state.data[iso]  || { sleep:0, wake:0 };
+      return scoreOf(prevDay.sleep ?? 0) + scoreOf(curDay.wake ?? 0);
     }
 
     // ====== 读取 data.json（失败则静默显示空数据） ======
@@ -325,6 +353,14 @@
       monthKeyEl.textContent = m.mk;
       monthDaysEl.textContent = String(m.days);
 
+      // —— 当日应结（昨日早睡 + 今日早起） ——
+      const isoToday = toISO(new Date());
+      const isoPrev  = addDaysISO(isoToday, -1);
+      const dailyDue = computeDailyDue(isoToday);
+      dailyDueEl.textContent = String(dailyDue);
+      dueTodayEl.textContent = isoToday;
+      duePrevEl.textContent = isoPrev;
+
       const settledTotal = state.settlement?.settledTotal || 0;
       const unsettled = total - settledTotal;
       unsettledEl.textContent = String(unsettled);
@@ -335,6 +371,9 @@
       totalScoreEl.style.color = (total <= 0) ? "rgba(46,204,113,.95)" : "rgba(255,77,79,.96)";
       monthScoreEl.style.color = (m.score <= 0) ? "rgba(46,204,113,.95)" : "rgba(255,77,79,.96)";
       unsettledEl.style.color = (unsettled <= 0) ? "rgba(46,204,113,.95)" : "rgba(255,77,79,.96)";
+
+      // 当日应结颜色（同样：<=0 代表赚）
+      dailyDueEl.style.color = (dailyDue <= 0) ? "rgba(46,204,113,.95)" : "rgba(255,77,79,.96)";
     }
 
     // ====== 渲染 ======
