@@ -187,13 +187,17 @@
       }
       .legend{ font-size:11px; gap:8px; }
 
-      .cell{ padding:8px; min-height:88px; }
+      .cell{
+        padding:6px;
+        min-height:auto;
+        height: clamp(72px, 14.2vw, 92px);
+      }
       .twoSlots{ gap:6px; }
 
       /* 重点：移动端隐藏“成功/失败/未填”文字，只保留颜色点 + “睡/起”标签 */
       .slot{
-        padding:7px 8px;
-        border-radius:12px;
+        padding:5px 7px;        /* 更薄 */
+        border-radius:10px;
         background: rgba(255,255,255,.05);
       }
       .slot .stateText{ display:none; }
